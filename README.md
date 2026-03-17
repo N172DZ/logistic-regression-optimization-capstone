@@ -23,7 +23,14 @@ The experiments use the Iris dataset and evaluate convergence behavior, classifi
 - `plots.py`: convergence and accuracy plots
 - `main.py`: runs the full experiment
 
+## Environment Setup
+```bash
+python3.9 -m venv capstone-env
+source capstone-env/bin/activate
+```
+
 ## How to Run
 ```bash
 pip install -r requirements.txt
 python main.py
+```
