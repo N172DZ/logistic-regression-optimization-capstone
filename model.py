@@ -2,9 +2,20 @@ import numpy as np
 
 
 class LogisticRegressionScratch:
-    def __init__(self, n_features, n_classes):
+    def __init__(self, n_features, n_classes, gamma=0.9, beta1=0.9, beta2=0.999, epsilon=1e-8):
         self.W = np.zeros((n_features, n_classes))
         self.b = np.zeros((1, n_classes))
+        
+        # Hyperparameters
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.epsilon = epsilon
+        self.t = 0 # Timestep for bias correction
+        
+        # Initialize moment buffers
+        self.m_W, self.v_W = np.zeros_like(self.W), np.zeros_like(self.W)
+        self.m_b, self.v_b = np.zeros_like(self.b), np.zeros_like(self.b)
+
 
     @staticmethod
     def softmax(z):

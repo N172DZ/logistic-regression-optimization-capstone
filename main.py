@@ -1,4 +1,3 @@
-from data_loader import load_data
 from train import train_model
 from evaluation import compare_runs
 from plots import plot_loss_curves, plot_accuracy_curves

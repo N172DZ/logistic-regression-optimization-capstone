@@ -1,3 +1,5 @@
+from pyexpat import model
+
 import numpy as np
 import time
 from model import LogisticRegressionScratch
@@ -71,6 +73,48 @@ def train_model(
                 model.W -= learning_rate * dW
                 model.b -= learning_rate * db
 
+        elif optimizer == "momentum":
+            batches = create_batches(X_train, y_train, batch_size)
+            for Xi, yi in batches:
+                dW, db = model.compute_gradients(Xi, yi)
+                model.m_W = model.beta1 * model.m_W + (1 - model.beta1) * dW
+                model.m_b = model.beta1 * model.m_b + (1 - model.beta1) * db
+                model.W -= learning_rate * model.m_W
+                model.b -= learning_rate * model.m_b
+
+        elif optimizer == "adam":
+            batches = create_batches(X_train, y_train, batch_size)
+            for Xi, yi in batches:
+                dW, db = model.compute_gradients(Xi, yi)
+                model.t += 1
+                model.m_W = model.beta1 * model.m_W + (1 - model.beta1) * dW
+                model.v_W = model.beta2 * model.v_W + (1 - model.beta2) * (dW ** 2)
+                m_W_hat = model.m_W / (1 - model.beta1 ** model.t)
+                v_W_hat = model.v_W / (1 - model.beta2 ** model.t)
+                model.W -= learning_rate * m_W_hat / (np.sqrt(v_W_hat) + model.epsilon)
+
+                model.m_b = model.beta1 * model.m_b + (1 - model.beta1) * db
+                model.v_b = model.beta2 * model.v_b + (1 - model.beta2) * (db ** 2)
+                m_b_hat = model.m_b / (1 - model.beta1 ** model.t)
+                v_b_hat = model.v_b / (1 - model.beta2 ** model.t)
+                model.b -= learning_rate * m_b_hat / (np.sqrt(v_b_hat) + model.epsilon)
+
+        elif optimizer == "custom_optimizer":
+            batches = create_batches(X_train, y_train, batch_size)
+            cache_W = np.zeros_like(model.W)
+            cache_b = np.zeros_like(model.b)
+            eps = 1e-8
+            for Xi, yi in batches:
+                dW, db = model.compute_gradients(Xi, yi)
+
+                # 1. Update the CACHE, not the weights
+                cache_W += dW**2
+                cache_b += db**2
+
+                # 2. Update the WEIGHTS using the cache for grain control
+                # Now np.sqrt will always be positive because cache_W is a sum of squares
+                model.W -= (learning_rate * dW) / (np.sqrt(cache_W) + eps)
+                model.b -= (learning_rate * db) / (np.sqrt(cache_b) + eps)
         else:
             raise ValueError("optimizer must be 'bgd', 'sgd', or 'mbgd'")
 
